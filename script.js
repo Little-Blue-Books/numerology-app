@@ -19,7 +19,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const data = analyzeNumerology(dob, fullname);
         
         // Render Results
-        renderResults(data);
+        renderResults(data, dob, fullname);
         
         // Show Results Area
         resultsArea.classList.add('active');
@@ -53,7 +53,6 @@ document.addEventListener('DOMContentLoaded', () => {
         };
 
         // 1. Convert Name to Numbers (Pythagorean)
-        // 1: A, J, S | 2: B, K, T | 3: C, L, U | 4: D, M, V | 5: E, N, W | 6: F, O, X | 7: G, P, Y | 8: H, Q, Z | 9: I, R
         const pythagoreanMap = {
             'A': 1, 'J': 1, 'S': 1,
             'B': 2, 'K': 2, 'T': 2,
@@ -76,7 +75,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const intensityCounts = countNumbers(nameNumbers);
 
         // 4. Planes of Expression
-        // Physical: 4, 5 | Emotional: 2, 3, 6 | Mental: 1, 8 | Intuitive: 7, 9
         const planes = {
             physical: (intensityCounts[4] || 0) + (intensityCounts[5] || 0),
             emotional: (intensityCounts[2] || 0) + (intensityCounts[3] || 0) + (intensityCounts[6] || 0),
@@ -86,14 +84,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // 5. Pinnacle Pyramid
         const dobParts = dob.split('-'); // [YYYY, MM, DD]
-        const year = reduceNumber(parseInt(dobParts[0]));
-        const month = reduceNumber(parseInt(dobParts[1]));
-        const day = reduceNumber(parseInt(dobParts[2]));
+        const yearNum = parseInt(dobParts[0]);
+        const monthNum = parseInt(dobParts[1]);
+        const dayNum = parseInt(dobParts[2]);
+
+        const year = reduceNumber(yearNum);
+        const month = reduceNumber(monthNum);
+        const day = reduceNumber(dayNum);
 
         const p1 = reduceNumber(month + day);
         const p2 = reduceNumber(day + year);
         const p3 = reduceNumber(p1 + p2);
         const p4 = reduceNumber(month + year);
+
+        // 6. Life Path Number
+        const lifePath = reduceNumber(yearNum + monthNum + dayNum);
 
         return {
             birthCounts,
@@ -101,7 +106,8 @@ document.addEventListener('DOMContentLoaded', () => {
             planes,
             pinnacles: { p1, p2, p3, p4 },
             numberMeanings,
-            planeMeanings
+            planeMeanings,
+            lifePath
         };
     }
 
@@ -133,21 +139,18 @@ document.addEventListener('DOMContentLoaded', () => {
     /**
      * Render results to UI
      */
-    function renderResults(data) {
+    function renderResults(data, dob, fullname) {
         renderBirthGrid(data.birthCounts);
         renderInclusionGrid(data.intensityCounts);
         renderIntensityTable(data.intensityCounts, data.numberMeanings);
         renderPlanesChart(data.planes);
         renderPyramid(data.pinnacles);
         renderPlaneDescriptions(data.planes, data.planeMeanings);
+        renderReport(data, dob, fullname);
     }
 
     /**
      * ① Birth Grid
-     * Layout:
-     * 3 6 9
-     * 2 5 8
-     * 1 4 7
      */
     function renderBirthGrid(counts) {
         const container = document.getElementById('birth-grid');
@@ -162,26 +165,19 @@ document.addEventListener('DOMContentLoaded', () => {
             container.appendChild(cell);
         });
 
-        // Line Check
-        const lines = [];
         const possibleLines = [
-            [1, 2, 3], [4, 5, 6], [7, 8, 9], // Horizontal (in terms of values)
-            [1, 4, 7], [2, 5, 8], [3, 6, 9], // Vertical
-            [1, 5, 9], [3, 5, 7]             // Diagonal
+            [1, 2, 3], [4, 5, 6], [7, 8, 9], 
+            [1, 4, 7], [2, 5, 8], [3, 6, 9], 
+            [1, 5, 9], [3, 5, 7]             
         ];
 
+        const activeLines = [];
         possibleLines.forEach(line => {
-            if (line.every(n => counts[n] > 0)) {
-                lines.push(line.join('-'));
-            }
+            if (line.every(n => counts[n] > 0)) activeLines.push(line.join('-'));
         });
 
         const lineDesc = document.getElementById('birth-grid-lines');
-        if (lines.length > 0) {
-            lineDesc.innerHTML = `<span class="text-rose-400 font-semibold">完成ライン:</span> ${lines.join(', ')} がアクティブです。`;
-        } else {
-            lineDesc.textContent = 'アクティブなラインはありません。';
-        }
+        lineDesc.innerHTML = activeLines.length > 0 ? `<span class="text-rose-400 font-semibold">完成ライン:</span> ${activeLines.join(', ')} がアクティブです。` : 'アクティブなラインはありません。';
     }
 
     /**
@@ -215,10 +211,10 @@ document.addEventListener('DOMContentLoaded', () => {
             let detail = meanings[i];
             
             if (count === 0) {
-                label = 'カルミック・レッスン (欠如)';
-                color = 'bg-gray-300';
+                label = '欠如';
+                color = 'bg-gray-200';
             } else if (count >= 4) {
-                label = '過多 (強すぎるエネルギー)';
+                label = '過多';
                 color = 'bg-orange-300';
             }
 
@@ -228,9 +224,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 <div class="flex justify-between items-center mb-1">
                     <div class="flex items-center">
                         <span class="w-6 font-bold text-gray-700">${i}</span>
-                        <span class="text-xs text-gray-400 ml-2">${label}</span>
+                        <span class="text-[10px] text-gray-400 ml-2">${label}</span>
                     </div>
-                    <span class="text-xs font-mono text-gray-500">${count}個</span>
+                    <span class="text-[10px] font-mono text-gray-400">${count}個</span>
                 </div>
                 <div class="intensity-bar-bg mb-1">
                     <div class="intensity-bar-fill ${color}" style="width: 0%"></div>
@@ -239,7 +235,6 @@ document.addEventListener('DOMContentLoaded', () => {
             `;
             container.appendChild(item);
             
-            // Trigger animation
             setTimeout(() => {
                 const fill = item.querySelector('.intensity-bar-fill');
                 fill.style.width = `${Math.min(count * 20, 100)}%`;
@@ -251,21 +246,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const container = document.getElementById('planes-description');
         const sorted = Object.entries(planes).sort((a, b) => b[1] - a[1]);
         const strongest = sorted[0][0];
-        
-        const keyMap = {
-            physical: '肉体的',
-            emotional: '感情的',
-            mental: '知性的',
-            intuitive: '精神的'
-        };
+        const keyMap = { physical: '肉体的', emotional: '感情的', mental: '知性的', intuitive: '精神的' };
 
         container.innerHTML = `
-            <p class="text-sm text-gray-600 mb-2">
-                あなたの最も強い領域は <span class="text-rose-500 font-bold">${keyMap[strongest]}</span> です。
-            </p>
-            <p class="text-xs text-gray-500 leading-relaxed">
-                ${meanings[strongest]}
-            </p>
+            <p class="text-sm text-gray-600 mb-2">あなたの最も強い領域は <span class="text-rose-500 font-bold">${keyMap[strongest]}</span> です。</p>
+            <p class="text-xs text-gray-500 leading-relaxed">${meanings[strongest]}</p>
         `;
     }
 
@@ -274,11 +259,7 @@ document.addEventListener('DOMContentLoaded', () => {
      */
     function renderPlanesChart(planes) {
         const ctx = document.getElementById('planes-chart').getContext('2d');
-        
-        if (planesChart) {
-            planesChart.destroy();
-        }
-
+        if (planesChart) planesChart.destroy();
         planesChart = new Chart(ctx, {
             type: 'radar',
             data: {
@@ -299,15 +280,10 @@ document.addEventListener('DOMContentLoaded', () => {
                         grid: { color: 'rgba(0, 0, 0, 0.05)' },
                         angleLines: { color: 'rgba(0, 0, 0, 0.05)' },
                         ticks: { display: false, stepSize: 1 },
-                        pointLabels: {
-                            color: '#6b7280',
-                            font: { size: 12 }
-                        }
+                        pointLabels: { color: '#6b7280', font: { size: 12 } }
                     }
                 },
-                plugins: {
-                    legend: { display: false }
-                },
+                plugins: { legend: { display: false } },
                 responsive: true,
                 maintainAspectRatio: false
             }
@@ -315,38 +291,108 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     /**
-     * ⑤ Pinnacle Pyramid (SVG)
+     * ⑤ Pinnacle Pyramid (SVG) - RE-ADJUSTED
      */
     function renderPyramid(pinnacles) {
         const container = document.getElementById('pyramid-container');
+        // Increase y values and viewBox height to prevent clipping
         container.innerHTML = `
-            <svg viewBox="0 0 400 270" class="w-full h-full pyramid-svg">
+            <svg viewBox="0 0 400 300" class="w-full h-full pyramid-svg" style="overflow: visible;">
                 <!-- Pyramid Lines -->
-                <path d="M200 40 L50 240 L350 240 Z" fill="none" stroke="rgba(0,0,0,0.05)" stroke-width="1" />
-                <path d="M200 40 L125 140 L275 140 Z" fill="none" stroke="rgba(251,113,133,0.3)" stroke-width="2" />
+                <path d="M200 60 L50 260 L350 260 Z" fill="none" stroke="rgba(0,0,0,0.05)" stroke-width="1" />
+                <path d="M200 60 L125 160 L275 160 Z" fill="none" stroke="rgba(251,113,133,0.3)" stroke-width="2" />
                 
                 <!-- P3 (Top) -->
-                <circle cx="200" cy="40" r="18" fill="rgba(251,113,133,0.1)" stroke="rgba(251,113,133,0.6)" />
-                <text x="200" y="47" text-anchor="middle" class="pyramid-value">${pinnacles.p3}</text>
-                <text x="200" y="15" text-anchor="middle" class="pyramid-label">第3ピナクル</text>
+                <circle cx="200" cy="60" r="18" fill="rgba(251,113,133,0.1)" stroke="rgba(251,113,133,0.6)" />
+                <text x="200" y="67" text-anchor="middle" class="pyramid-value">${pinnacles.p3}</text>
+                <text x="200" y="30" text-anchor="middle" class="pyramid-label" style="font-weight: 600;">第3ピナクル</text>
 
                 <!-- P1 (Mid Left) -->
-                <circle cx="125" cy="140" r="18" fill="rgba(251,113,133,0.05)" stroke="rgba(251,113,133,0.4)" />
-                <text x="125" y="147" text-anchor="middle" class="pyramid-value">${pinnacles.p1}</text>
-                <text x="80" y="145" text-anchor="end" class="pyramid-label">第1</text>
+                <circle cx="125" cy="160" r="18" fill="rgba(251,113,133,0.05)" stroke="rgba(251,113,133,0.4)" />
+                <text x="125" y="167" text-anchor="middle" class="pyramid-value">${pinnacles.p1}</text>
+                <text x="80" y="165" text-anchor="end" class="pyramid-label">第1</text>
 
                 <!-- P2 (Mid Right) -->
-                <circle cx="275" cy="140" r="18" fill="rgba(251,113,133,0.05)" stroke="rgba(251,113,133,0.4)" />
-                <text x="275" y="147" text-anchor="middle" class="pyramid-value">${pinnacles.p2}</text>
-                <text x="320" y="145" text-anchor="start" class="pyramid-label">第2</text>
+                <circle cx="275" cy="160" r="18" fill="rgba(251,113,133,0.05)" stroke="rgba(251,113,133,0.4)" />
+                <text x="275" y="167" text-anchor="middle" class="pyramid-value">${pinnacles.p2}</text>
+                <text x="320" y="165" text-anchor="start" class="pyramid-label">第2</text>
 
                 <!-- P4 (Bottom Center) -->
-                <circle cx="200" cy="230" r="18" fill="rgba(251,113,133,0.1)" stroke="rgba(251,113,133,0.4)" />
-                <text x="200" y="237" text-anchor="middle" class="pyramid-value">${pinnacles.p4}</text>
-                <text x="200" y="265" text-anchor="middle" class="pyramid-label">第4ピナクル</text>
+                <circle cx="200" cy="250" r="18" fill="rgba(251,113,133,0.1)" stroke="rgba(251,113,133,0.4)" />
+                <text x="200" y="257" text-anchor="middle" class="pyramid-value">${pinnacles.p4}</text>
+                <text x="200" y="285" text-anchor="middle" class="pyramid-label">第4ピナクル</text>
             </svg>
         `;
     }
+
+    /**
+     * ⑥ Detailed Reading Report
+     */
+    function renderReport(data, dob, fullname) {
+        const container = document.getElementById('report-container');
+        
+        // 1. Life Path Reading
+        const lpMeanings = {
+            1: "自分の道を切り拓くリーダー。革新的で独立心が強く、新しいアイデアを実行に移す力を持っています。",
+            2: "調和と協力を重んじるサポーター。繊細な感受性を持ち、人との繋がりを大切にします。",
+            3: "表現豊かなクリエイター。言葉や芸術を通じて喜びを広め、周囲を明るくする才能があります。",
+            4: "誠実で安定感のあるビルダー。努力家で秩序を重んじ、着実に目標を達成する信頼される存在です。",
+            5: "自由を愛する冒険家。変化を恐れず、多様な経験を通じて成長し、枠に囚われない生き方をします。",
+            6: "愛と責任の奉仕者。家族や身近な人々を慈しみ、調和の取れた美しい環境を作ることに長けています。",
+            7: "真理を追究する探求者。深い洞察力と精神性を持ち、静寂の中で知恵を育む孤独な哲学者の一面があります。",
+            8: "豊かさを実現する達成者。野心的で組織力があり、物質的な成功と精神的な満足を両立させる力があります。",
+            9: "すべてを包み込む博愛主義者。広い視野を持ち、人々のために尽力することで魂の完成を目指します。",
+            11: "直感に導かれるメッセンジャー。高い理想を持ち、インスピレーションを形にして人々に希望を与えます。",
+            22: "理想を現実に変えるマスタービルダー。壮大なビジョンを持ち、社会に貢献する大きな仕組みを築きます。"
+        };
+
+        // 2. Karmic Lessons Reading (Missing numbers)
+        const missing = Object.entries(data.intensityCounts).filter(e => e[1] === 0).map(e => e[0]);
+        let karmicText = "";
+        if (missing.length === 0) {
+            karmicText = "あなたの名前には全ての数字のエネルギーが含まれています。バランスが取れており、多様な経験を自然にこなせるでしょう。";
+        } else {
+            karmicText = `あなたの名前には「${missing.join(', ')}」のエネルギーが欠けています。これは今世で意識的に学ぶべき「課題」であり、不足を感じるからこそ、そこに向き合うことで大きな成長が得られます。`;
+        }
+
+        // 3. Pinnacle Summary
+        const pinnacleText = `現在は第${calculateCurrentPinnacle(dob)}ピナクルの影響下にあります。この時期は「${data.numberMeanings[data.pinnacles['p'+calculateCurrentPinnacle(dob)]]}」というテーマが人生の舞台に現れやすくなります。`;
+
+        container.innerHTML = `
+            <div class="border-l-4 border-rose-400 pl-6 mb-8">
+                <h3 class="text-xl font-bold text-gray-800 mb-2">1. あなたの魂の地図：誕生数 ${data.lifePath}</h3>
+                <p>${lpMeanings[data.lifePath] || "独自の才能を持つ個性的な魂です。"}</p>
+            </div>
+            
+            <div class="border-l-4 border-orange-400 pl-6 mb-8">
+                <h3 class="text-xl font-bold text-gray-800 mb-2">2. 今世での学び：カルミック・レッスン</h3>
+                <p>${karmicText}</p>
+            </div>
+            
+            <div class="border-l-4 border-amber-400 pl-6 mb-8">
+                <h3 class="text-xl font-bold text-gray-800 mb-2">3. 人生のバイオリズム：現在のステージ</h3>
+                <p>${pinnacleText}</p>
+            </div>
+
+            <div class="bg-rose-50/30 p-6 rounded-2xl border border-rose-100">
+                <h3 class="text-lg font-bold text-rose-600 mb-3">アドバイス</h3>
+                <p class="text-sm">
+                    このダッシュボードに現れた数字は、あなたの「エネルギーの在庫目録」です。
+                    過多な部分は「強み」として活かし、欠如している部分は「これから育てていく伸び代」として捉えてください。
+                    自分自身のエネルギーを客観的に眺めることで、よりあなたらしい選択ができるようになるはずです。
+                </p>
+            </div>
         `;
+    }
+
+    function calculateCurrentPinnacle(dob) {
+        // Simple age-based estimate for demo (standard numerology)
+        const birthYear = new Date(dob).getFullYear();
+        const currentYear = new Date().getFullYear();
+        const age = currentYear - birthYear;
+        if (age < 28) return 1;
+        if (age < 37) return 2;
+        if (age < 46) return 3;
+        return 4;
     }
 });
