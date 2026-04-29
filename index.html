@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Numerology Insights Dashboard | 数秘術分析</title>
+    <meta name="description" content="生年月日と氏名からあなたの資質やエネルギーのバランスを可視化する、ピタゴラス式数秘術分析ダッシュボードです。">
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=Noto+Sans+JP:wght@300;400;700&display=swap" rel="stylesheet">
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="bg-[#fcfaf7] text-gray-800 font-['Outfit',_'Noto_Sans_JP',_sans-serif] min-h-screen">
+    
+    <!-- Background Decor -->
+    <div class="fixed inset-0 z-0 opacity-60 bg-cover bg-center pointer-events-none" style="background-image: url('bg_light.png');"></div>
+    <div class="fixed inset-0 z-0 bg-gradient-to-br from-white/80 via-white/40 to-[#fff5f5]/80 pointer-events-none"></div>
+
+    <main class="relative z-10 container mx-auto px-4 py-12 max-w-6xl">
+        
+        <!-- Header -->
+        <header class="text-center mb-16">
+            <h1 class="text-5xl md:text-6xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-rose-400 to-amber-500 mb-4 tracking-tight">
+                Numerology Insights
+            </h1>
+            <p class="text-gray-500 text-lg md:text-xl font-light">エネルギーの在庫目録：あなたの本質を可視化する</p>
+        </header>
+
+        <!-- Input Form -->
+        <section class="max-w-2xl mx-auto mb-20">
+            <div class="glass-card p-8 rounded-3xl border border-rose-100 shadow-xl shadow-rose-100/20">
+                <form id="analysis-form" class="space-y-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label for="dob" class="block text-sm font-medium text-gray-500 mb-2">生年月日 (Date of Birth)</label>
+                            <input type="date" id="dob" required
+                                class="w-full bg-white/60 border border-rose-100 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-rose-300 text-gray-700 transition-all">
+                        </div>
+                        <div>
+                            <label for="fullname" class="block text-sm font-medium text-gray-500 mb-2">氏名 (Full Name - ローマ字)</label>
+                            <input type="text" id="fullname" placeholder="TARO YAMADA" required
+                                class="w-full bg-white/60 border border-rose-100 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-rose-300 text-gray-700 transition-all uppercase">
+                        </div>
+                    </div>
+                    <button type="submit" 
+                        class="w-full py-4 bg-gradient-to-r from-rose-400 to-orange-300 hover:from-rose-500 hover:to-orange-400 text-white font-bold rounded-xl shadow-lg transform transition active:scale-[0.98]">
+                        分析を開始する
+                    </button>
+                </form>
+            </div>
+        </section>
+
+        <!-- Result Section (Initially Hidden) -->
+        <div id="results" class="hidden space-y-12">
+            
+            <!-- Grid Layout: Birth Grid & Inclusion -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                <!-- ① Birth Grid -->
+                <div class="glass-card p-8 rounded-3xl border border-rose-100 shadow-lg">
+                    <h2 class="text-2xl font-bold mb-6 flex items-center text-gray-700">
+                        <span class="w-8 h-8 rounded-full bg-rose-500/10 text-rose-400 flex items-center justify-center mr-3 text-sm">01</span>
+                        Birth Grid (資質の配置)
+                    </h2>
+                    <div class="flex flex-col items-center">
+                        <div id="birth-grid" class="numerology-grid">
+                            <!-- JS handles grid items -->
+                        </div>
+                        <div id="birth-grid-lines" class="mt-6 text-sm text-gray-400 italic min-h-[1.5rem]">
+                            <!-- Lines description -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ④ Inclusion -->
+                <div class="glass-card p-8 rounded-3xl border border-rose-100 shadow-lg">
+                    <h2 class="text-2xl font-bold mb-6 flex items-center text-gray-700">
+                        <span class="w-8 h-8 rounded-full bg-orange-500/10 text-orange-400 flex items-center justify-center mr-3 text-sm">04</span>
+                        Inclusion (空室チェック)
+                    </h2>
+                    <div class="flex flex-col items-center">
+                        <div id="inclusion-grid" class="numerology-grid inclusion">
+                            <!-- JS handles grid items -->
+                        </div>
+                        <p class="mt-6 text-sm text-gray-400 text-center">
+                            <span class="text-pink-400 font-semibold">ダークなマス:</span> 隠れた不安や盲点、今世での課題
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Analysis Layout: Intensity & Planes -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                <!-- ② Intensity Table -->
+                <div class="glass-card p-8 rounded-3xl border border-rose-100 shadow-lg">
+                    <h2 class="text-2xl font-bold mb-6 flex items-center text-gray-700">
+                        <span class="w-8 h-8 rounded-full bg-rose-500/10 text-rose-400 flex items-center justify-center mr-3 text-sm">02</span>
+                        Intensity Table (強弱の表)
+                    </h2>
+                    <div id="intensity-container" class="space-y-4">
+                        <!-- JS handles bars -->
+                    </div>
+                </div>
+
+                <!-- ③ Planes of Expression -->
+                <div class="glass-card p-8 rounded-3xl border border-rose-100 shadow-lg">
+                    <h2 class="text-2xl font-bold mb-6 flex items-center text-gray-700">
+                        <span class="w-8 h-8 rounded-full bg-orange-500/10 text-orange-400 flex items-center justify-center mr-3 text-sm">03</span>
+                        Planes of Expression (表現の領域)
+                    </h2>
+                    <div class="h-64 md:h-80 relative">
+                        <canvas id="planes-chart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ⑤ Pinnacle Pyramid -->
+            <div class="glass-card p-8 rounded-3xl border border-rose-100 shadow-lg overflow-hidden">
+                <h2 class="text-2xl font-bold mb-6 flex items-center text-gray-700">
+                    <span class="w-8 h-8 rounded-full bg-amber-500/10 text-amber-500 flex items-center justify-center mr-3 text-sm">05</span>
+                    Pinnacle Pyramid (人生の4つの頂点)
+                </h2>
+                <div class="flex justify-center items-center py-8">
+                    <div id="pyramid-container" class="relative w-full max-w-2xl aspect-[1.5/1]">
+                        <!-- SVG Pyramid will be injected here -->
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Footer -->
+        <footer class="mt-24 text-center text-gray-500 text-sm">
+            <p>&copy; 2026 Numerology Insights Dashboard. All Rights Reserved.</p>
+        </footer>
+
+    </main>
+
+    <script src="script.js"></script>
+</body>
+</html>
