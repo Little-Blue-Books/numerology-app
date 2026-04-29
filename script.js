@@ -291,11 +291,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     /**
-     * ⑤ Pinnacle Pyramid (SVG) - RE-ADJUSTED
+     * ⑤ Pinnacle Pyramid (SVG)
      */
     function renderPyramid(pinnacles) {
         const container = document.getElementById('pyramid-container');
-        // Increase y values and viewBox height to prevent clipping
         container.innerHTML = `
             <svg viewBox="0 0 400 300" class="w-full h-full pyramid-svg" style="overflow: visible;">
                 <!-- Pyramid Lines -->
@@ -326,73 +325,134 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     /**
-     * ⑥ Detailed Reading Report
+     * ⑥ Detailed Reading Report - EXPANDED
      */
     function renderReport(data, dob, fullname) {
         const container = document.getElementById('report-container');
         
-        // 1. Life Path Reading
-        const lpMeanings = {
-            1: "自分の道を切り拓くリーダー。革新的で独立心が強く、新しいアイデアを実行に移す力を持っています。",
-            2: "調和と協力を重んじるサポーター。繊細な感受性を持ち、人との繋がりを大切にします。",
-            3: "表現豊かなクリエイター。言葉や芸術を通じて喜びを広め、周囲を明るくする才能があります。",
-            4: "誠実で安定感のあるビルダー。努力家で秩序を重んじ、着実に目標を達成する信頼される存在です。",
-            5: "自由を愛する冒険家。変化を恐れず、多様な経験を通じて成長し、枠に囚われない生き方をします。",
-            6: "愛と責任の奉仕者。家族や身近な人々を慈しみ、調和の取れた美しい環境を作ることに長けています。",
-            7: "真理を追究する探求者。深い洞察力と精神性を持ち、静寂の中で知恵を育む孤独な哲学者の一面があります。",
-            8: "豊かさを実現する達成者。野心的で組織力があり、物質的な成功と精神的な満足を両立させる力があります。",
-            9: "すべてを包み込む博愛主義者。広い視野を持ち、人々のために尽力することで魂の完成を目指します。",
-            11: "直感に導かれるメッセンジャー。高い理想を持ち、インスピレーションを形にして人々に希望を与えます。",
-            22: "理想を現実に変えるマスタービルダー。壮大なビジョンを持ち、社会に貢献する大きな仕組みを築きます。"
+        // --- 1. Life Path Detailed Dictionary ---
+        const lpDetails = {
+            1: "独立独歩のパイオニア。革新的でリーダーシップに溢れ、未知の領域へ第一歩を踏み出す勇気を持っています。自信に満ちた行動が周囲を牽引しますが、独断専行にならないよう注意が必要です。あなたの強みは圧倒的な決断力と創造性にあります。",
+            2: "調和と感受性の人。優れた共感力を持ち、集団の中での潤滑油的な役割を果たします。細やかな配慮と外交能力に長けていますが、他人の評価を気にしすぎる面もあります。自分自身の内なる声と他人との境界線を大切にすることで、真の調和が生まれます。",
+            3: "自己表現と創造の喜びを象徴する魂。楽観的でコミュニケーション能力が高く、芸術や言葉を通じて人々を癒し、楽しませる才能があります。多才ゆえにエネルギーが分散しやすいため、一つの表現方法を深く追求することが成功の鍵となります。",
+            4: "秩序と安定を築くビルダー。誠実で努力家、計画的に物事を進める実務能力は周囲から絶大な信頼を寄せられます。変化を恐れ硬直化しやすい傾向がありますが、基盤を整えた上で柔軟性を取り入れることで、誰にも崩せない真の成功を手にします。",
+            5: "自由と変化を愛する冒険家。知的好奇心が旺盛で、変化の激しい環境でこそ真価を発揮します。適応力と多才さは武器ですが、飽きっぽさや放縦に流されない自律心を持つことで、経験が知恵へと昇華され、多くの人を導くカリスマ性が目覚めます。",
+            6: "愛と責任の奉仕者。家族やコミュニティに対する献身的な愛を持ち、調和の取れた美しい環境を整えることに喜びを感じます。世話を焼きすぎて過干渉にならないよう注意が必要ですが、あなたの慈愛のエネルギーは多くの人々を精神的に支える柱となります。",
+            7: "真理を探求する知性の魂。分析力と洞察力に優れ、独りの時間を大切にしながら物事の本質を解き明かします。完璧主義が孤独を深めることがありますが、精神的な学びを深めることで、世俗的な成功を超えた深い知恵と平穏を手にする哲学者となります。",
+            8: "権威と豊かさを実現する達成者。組織を動かす力とビジネスセンスに長け、大きな目標を達成する不屈の精神を持っています。物質的な成功へのこだわりが強すぎると冷酷に見えることがありますが、精神的な価値と統合することで、社会に真の豊かさをもたらします。",
+            9: "すべてを包み込む博愛主義者。広い視野と深い慈愛を持ち、個人の利益を超えて人類全体の幸福のために尽力します。理想が高すぎて現実に失望することがあるかもしれませんが、手放すことの美しさを知ることで、最も高い次元の精神的自由を手にします。",
+            11: "直感と霊感のメッセンジャー。高い理想と鋭いインスピレーションを持ち、人々に新たな視点や希望を与える役割を担っています。非常に繊細で、現実とのギャップに苦しむことがありますが、その感性を形にすることで、多くの人の魂を震わせる使命を果たします。",
+            22: "理想を形にするマスタービルダー。壮大なビジョンと、それを実行に移す圧倒的な実務能力を併せ持っています。責任の重さに圧倒されることもありますが、多くの人々と協力して社会に永続的な価値を築く、人類の発展に寄与する大きな運命を背負っています。"
         };
 
-        // 2. Karmic Lessons Reading (Missing numbers)
+        // --- 2. Karmic Lesson Detailed Dictionary (Missing Numbers) ---
+        const karmicDetails = {
+            1: "【自己の確立】自分を信じる力、独自のアイデンティティを確立することがテーマです。周囲に合わせるのではなく、自分の意見を毅然と主張する勇気を持ちましょう。",
+            2: "【協力と調和】忍耐強さ、他人との細やかな協力関係を築くことが学びです。他人のペースに合わせることや、静かに待つことの重要性を知る機会が訪れます。",
+            3: "【表現の勇気】自分の考えや感情を率直に、かつ明るく表現することがテーマです。内面にある創造性を恥ずかしがらずに外へ出すことで、運気が開けます。",
+            4: "【基盤と規律】継続すること、秩序を保つこと、地道な努力の価値を学ぶ必要があります。物事を途中で投げ出さず、細部まで丁寧に仕上げる姿勢が大切です。",
+            5: "【変化への適応】新しい環境や予期せぬ変化を受け入れ、楽しむ柔軟性を養うことがテーマです。未知の領域への恐怖を克服し、自由に羽ばたく力を育てましょう。",
+            6: "【責任と奉仕】家族や身近な人々に対する無償の愛と、責任を引き受けることが学びです。自分の都合だけでなく、他人のために何ができるかを考えることで成長します。",
+            7: "【内省と信頼】目に見えない真理を信じること、自分自身の内面を深く見つめることがテーマです。表面的な情報に惑わされず、直感や精神的な学びを深めてください。",
+            8: "【パワーの行使】金銭管理や、力・権威を正しく扱うことが学びです。物質的な豊かさに対して健全な意欲を持ち、それを社会のためにどう使うかを学びましょう。",
+            9: "【寛容と慈愛】執着を手放し、すべてを許し、愛すること。偏見を捨てて広い心で世界を見つめ、無償の愛を実践することが魂の成長に繋がります。"
+        };
+
+        // --- 3. Pinnacle Detailed Dictionary (Cycle Themes) ---
+        const pinnacleDetails = {
+            1: "「自立と新しい始まり」の時期。他人に頼らず自分の足で立つことが求められます。新たなプロジェクトの立ち上げや、リーダーシップを発揮する機会が増えるでしょう。勇気を持って決断することが成功の鍵です。",
+            2: "「調和と協力」の時期。忍耐力と外交能力が試されます。人との協力関係やパートナーシップを通じて物事が進展します。細やかな配慮と、待つ姿勢を大切にしてください。",
+            3: "「表現と社交」の時期。あなたの創造性が豊かに花開きます。コミュニケーション、執筆、芸術活動などを通じて注目を集めるでしょう。人生を楽しみ、周囲を明るく照らしてください。",
+            4: "「基盤と努力」の時期。地道な積み重ねが後の大きな成果に繋がります。規律正しく働き、家や仕事の基盤を固めることに専念してください。今は確実な一歩を刻むときです。",
+            5: "「変化と冒険」の時期。予期せぬ出来事や旅行、転居など、生活に刺激が訪れます。古い習慣を脱ぎ捨て、自由を謳歌してください。好奇心に従って動くことが幸運を呼びます。",
+            6: "「家庭と責任」の時期。家族や共同体への奉仕、愛がテーマとなります。他者の面倒を見る役割が増えるかもしれませんが、それはあなたにとって大きな喜びと安定をもたらすでしょう。",
+            7: "「内省と教育」の時期。静かに自分自身を見つめ、学びを深めるのに最適な時期です。精神的な探求や専門的な研究に時間を割いてください。外側の喧騒から離れ、内なる平安を築きましょう。",
+            8: "「達成とパワー」の時期。これまでの努力が形となり、物質的な成功や権威を手にするチャンスです。組織力や経営能力が評価されます。大胆に野心を持って行動し、成果を勝ち取ってください。",
+            9: "「完結と奉仕」の時期。古いものが終わり、新しいサイクルのための準備が始まります。執着を手放し、周囲への愛を実践してください。寛大な心が、次のステージへの素晴らしい架け橋となります。",
+            11: "「インスピレーションと啓示」の時期。非常に高いエネルギーが流れ、あなたの直感が冴え渡ります。理想を高く持ち、人々に精神的な影響を与える役割を担うことになります。魂の目的を再確認してください。",
+            22: "「大規模な構築」の時期。あなたのビジョンが形になり、社会に大きな影響を与える事業や活動が展開されます。多忙を極めるかもしれませんが、人類の未来に寄与する仕事に誇りを持って取り組んでください。"
+        };
+
+        // --- Generate Report HTML ---
         const missing = Object.entries(data.intensityCounts).filter(e => e[1] === 0).map(e => e[0]);
-        let karmicText = "";
+        let karmicSection = "";
         if (missing.length === 0) {
-            karmicText = "あなたの名前には全ての数字のエネルギーが含まれています。バランスが取れており、多様な経験を自然にこなせるでしょう。";
+            karmicSection = `<p class="mb-4">あなたの名前には全ての数字のエネルギーが含まれています。これは「バランスの取れた魂」であることを示し、どのような状況でも臨機応変に対応できる高い適応力を持っています。</p>`;
         } else {
-            karmicText = `あなたの名前には「${missing.join(', ')}」のエネルギーが欠けています。これは今世で意識的に学ぶべき「課題」であり、不足を感じるからこそ、そこに向き合うことで大きな成長が得られます。`;
+            karmicSection = `<ul class="space-y-4">`;
+            missing.forEach(num => {
+                karmicSection += `
+                    <li class="bg-gray-50/50 p-4 rounded-xl border border-gray-100">
+                        <span class="inline-block px-2 py-1 bg-gray-200 text-gray-700 text-xs font-bold rounded mb-2">Lesson ${num}</span>
+                        <p class="text-sm">${karmicDetails[num]}</p>
+                    </li>`;
+            });
+            karmicSection += `</ul>`;
         }
 
-        // 3. Pinnacle Summary
-        const pinnacleText = `現在は第${calculateCurrentPinnacle(dob)}ピナクルの影響下にあります。この時期は「${data.numberMeanings[data.pinnacles['p'+calculateCurrentPinnacle(dob)]]}」というテーマが人生の舞台に現れやすくなります。`;
+        const currPinnacle = calculateCurrentPinnacle(dob);
+        const currPinnacleNum = data.pinnacles['p' + currPinnacle];
 
         container.innerHTML = `
-            <div class="border-l-4 border-rose-400 pl-6 mb-8">
-                <h3 class="text-xl font-bold text-gray-800 mb-2">1. あなたの魂の地図：誕生数 ${data.lifePath}</h3>
-                <p>${lpMeanings[data.lifePath] || "独自の才能を持つ個性的な魂です。"}</p>
+            <div class="mb-12">
+                <div class="flex items-center mb-4">
+                    <span class="w-10 h-10 rounded-full bg-rose-500 text-white flex items-center justify-center font-bold text-xl mr-4 shadow-lg shadow-rose-200">${data.lifePath}</span>
+                    <h3 class="text-2xl font-bold text-gray-800">1. あなたの魂の本質（誕生数）</h3>
+                </div>
+                <p class="text-gray-600 pl-14 leading-relaxed">${lpDetails[data.lifePath] || "独自の才能を持つ個性的な魂です。"}</p>
             </div>
             
-            <div class="border-l-4 border-orange-400 pl-6 mb-8">
-                <h3 class="text-xl font-bold text-gray-800 mb-2">2. 今世での学び：カルミック・レッスン</h3>
-                <p>${karmicText}</p>
+            <div class="mb-12">
+                <div class="flex items-center mb-6">
+                    <span class="w-10 h-10 rounded-full bg-orange-400 text-white flex items-center justify-center font-bold text-xl mr-4 shadow-lg shadow-orange-100">!</span>
+                    <h3 class="text-2xl font-bold text-gray-800">2. 今世で向き合うべき学び（カルミック・レッスン）</h3>
+                </div>
+                <div class="pl-14">
+                    <p class="text-gray-500 text-sm mb-6">氏名に欠けている数字は、あなたが今世で意識的に学ぶ必要があるテーマを示しています。</p>
+                    ${karmicSection}
+                </div>
             </div>
             
-            <div class="border-l-4 border-amber-400 pl-6 mb-8">
-                <h3 class="text-xl font-bold text-gray-800 mb-2">3. 人生のバイオリズム：現在のステージ</h3>
-                <p>${pinnacleText}</p>
+            <div class="mb-12">
+                <div class="flex items-center mb-6">
+                    <span class="w-10 h-10 rounded-full bg-amber-400 text-white flex items-center justify-center font-bold text-xl mr-4 shadow-lg shadow-amber-100">${currPinnacleNum}</span>
+                    <h3 class="text-2xl font-bold text-gray-800">3. 現在のステージ（第${currPinnacle}ピナクル周期）</h3>
+                </div>
+                <div class="pl-14">
+                    <p class="text-gray-600 leading-relaxed">${pinnacleDetails[currPinnacleNum]}</p>
+                    <p class="text-xs text-gray-400 mt-4 italic">※現在の年齢(${calculateAge(dob)}歳)に基づき推定しています。</p>
+                </div>
             </div>
 
-            <div class="bg-rose-50/30 p-6 rounded-2xl border border-rose-100">
-                <h3 class="text-lg font-bold text-rose-600 mb-3">アドバイス</h3>
-                <p class="text-sm">
-                    このダッシュボードに現れた数字は、あなたの「エネルギーの在庫目録」です。
-                    過多な部分は「強み」として活かし、欠如している部分は「これから育てていく伸び代」として捉えてください。
-                    自分自身のエネルギーを客観的に眺めることで、よりあなたらしい選択ができるようになるはずです。
+            <div class="bg-gradient-to-r from-rose-50 to-orange-50 p-8 rounded-3xl border border-rose-100 mt-16">
+                <h3 class="text-xl font-bold text-rose-600 mb-4 flex items-center">
+                    <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    総合アドバイス
+                </h3>
+                <p class="text-gray-600 text-sm leading-relaxed">
+                    これらの数字は決定された「運命」ではなく、あなたが持っている「資質」の地図です。
+                    資質をどう活かし、課題をどう乗り越えるかはあなた次第です。
+                    特に「カルミック・レッスン」で示された数字を意識的に行動に取り入れることで、
+                    現在直面している停滞感を打破し、人生をより豊かなものへと変えていけるでしょう。
                 </p>
             </div>
         `;
     }
 
     function calculateCurrentPinnacle(dob) {
-        // Simple age-based estimate for demo (standard numerology)
-        const birthYear = new Date(dob).getFullYear();
-        const currentYear = new Date().getFullYear();
-        const age = currentYear - birthYear;
+        const age = calculateAge(dob);
         if (age < 28) return 1;
         if (age < 37) return 2;
         if (age < 46) return 3;
         return 4;
+    }
+
+    function calculateAge(dob) {
+        const birthDate = new Date(dob);
+        const today = new Date();
+        let age = today.getFullYear() - birthDate.getFullYear();
+        const m = today.getMonth() - birthDate.getMonth();
+        if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) age--;
+        return age;
     }
 });
