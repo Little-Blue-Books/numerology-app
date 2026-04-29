@@ -325,12 +325,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     /**
-     * ⑥ Detailed Reading Report - EXPANDED
+     * ⑥ Detailed Reading Report
      */
     function renderReport(data, dob, fullname) {
         const container = document.getElementById('report-container');
         
-        // --- 1. Life Path Detailed Dictionary ---
         const lpDetails = {
             1: "独立独歩のパイオニア。革新的でリーダーシップに溢れ、未知の領域へ第一歩を踏み出す勇気を持っています。自信に満ちた行動が周囲を牽引しますが、独断専行にならないよう注意が必要です。あなたの強みは圧倒的な決断力と創造性にあります。",
             2: "調和と感受性の人。優れた共感力を持ち、集団の中での潤滑油的な役割を果たします。細やかな配慮と外交能力に長けていますが、他人の評価を気にしすぎる面もあります。自分自身の内なる声と他人との境界線を大切にすることで、真の調和が生まれます。",
@@ -345,7 +344,6 @@ document.addEventListener('DOMContentLoaded', () => {
             22: "理想を形にするマスタービルダー。壮大なビジョンと、それを実行に移す圧倒的な実務能力を併せ持っています。責任の重さに圧倒されることもありますが、多くの人々と協力して社会に永続的な価値を築く、人類の発展に寄与する大きな運命を背負っています。"
         };
 
-        // --- 2. Karmic Lesson Detailed Dictionary (Missing Numbers) ---
         const karmicDetails = {
             1: "【自己の確立】自分を信じる力、独自のアイデンティティを確立することがテーマです。周囲に合わせるのではなく、自分の意見を毅然と主張する勇気を持ちましょう。",
             2: "【協力と調和】忍耐強さ、他人との細やかな協力関係を築くことが学びです。他人のペースに合わせることや、静かに待つことの重要性を知る機会が訪れます。",
@@ -358,7 +356,6 @@ document.addEventListener('DOMContentLoaded', () => {
             9: "【寛容と慈愛】執着を手放し、すべてを許し、愛すること。偏見を捨てて広い心で世界を見つめ、無償の愛を実践することが魂の成長に繋がります。"
         };
 
-        // --- 3. Pinnacle Detailed Dictionary (Cycle Themes) ---
         const pinnacleDetails = {
             1: "「自立と新しい始まり」の時期。他人に頼らず自分の足で立つことが求められます。新たなプロジェクトの立ち上げや、リーダーシップを発揮する機会が増えるでしょう。勇気を持って決断することが成功の鍵です。",
             2: "「調和と協力」の時期。忍耐力と外交能力が試されます。人との協力関係やパートナーシップを通じて物事が進展します。細やかな配慮と、待つ姿勢を大切にしてください。",
@@ -373,11 +370,10 @@ document.addEventListener('DOMContentLoaded', () => {
             22: "「大規模な構築」の時期。あなたのビジョンが形になり、社会に大きな影響を与える事業や活動が展開されます。多忙を極めるかもしれませんが、人類の未来に寄与する仕事に誇りを持って取り組んでください。"
         };
 
-        // --- Generate Report HTML ---
         const missing = Object.entries(data.intensityCounts).filter(e => e[1] === 0).map(e => e[0]);
         let karmicSection = "";
         if (missing.length === 0) {
-            karmicSection = `<p class="mb-4">あなたの名前には全ての数字のエネルギーが含まれています。これは「バランスの取れた魂」であることを示し、どのような状況でも臨機応変に対応できる高い適応力を持っています。</p>`;
+            karmicSection = `<p class="mb-4">あなたの名前には全ての数字のエネルギーが含まれています。バランスが取れており、多様な経験を自然にこなせるでしょう。</p>`;
         } else {
             karmicSection = `<ul class="space-y-4">`;
             missing.forEach(num => {
@@ -395,11 +391,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
         container.innerHTML = `
             <div class="mb-12">
-                <div class="flex items-center mb-4">
-                    <span class="w-10 h-10 rounded-full bg-rose-500 text-white flex items-center justify-center font-bold text-xl mr-4 shadow-lg shadow-rose-200">${data.lifePath}</span>
-                    <h3 class="text-2xl font-bold text-gray-800">1. あなたの魂の本質（誕生数）</h3>
+                <div class="flex items-center mb-6">
+                    <span class="w-12 h-12 rounded-full bg-rose-500 text-white flex items-center justify-center font-bold text-2xl mr-4 shadow-lg shadow-rose-200">${data.lifePath}</span>
+                    <h3 class="text-2xl md:text-3xl font-bold text-gray-800 leading-tight">
+                        1. あなたの魂の本質：<br class="md:hidden">誕生数は <span class="text-rose-500">「${data.lifePath}」</span> です
+                    </h3>
                 </div>
-                <p class="text-gray-600 pl-14 leading-relaxed">${lpDetails[data.lifePath] || "独自の才能を持つ個性的な魂です。"}</p>
+                <p class="text-gray-600 pl-16 leading-relaxed border-l-2 border-rose-100 ml-6">${lpDetails[data.lifePath] || "独自の才能を持つ個性的な魂です。"}</p>
             </div>
             
             <div class="mb-12">
